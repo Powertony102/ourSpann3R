@@ -70,7 +70,7 @@ def main(args):
     datasets_all = {
         # "7scenes": SevenScenes(
         #     split="test",
-        #     ROOT="/root/autodl-tmp/data/7-scenes",
+        #     ROOT="/home/jovyan/shared/xinzeli/fastplus/7-scenes",
         #     resolution=resolution,
         #     num_seq=1,
         #     full_video=True,
@@ -78,7 +78,7 @@ def main(args):
         # ),  # 20),
         "NRGBD": NRGBD(
             split="test",
-            ROOT="/root/autodl-tmp/data/neural_rgbd_data/",
+            ROOT="/home/jovyan/shared/xinzeli/fastplus/nrgbd",
             resolution=resolution,
             num_seq=1,
             full_video=True,
