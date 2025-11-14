@@ -88,8 +88,35 @@ def main(args):
 
     device = args.device
 
-    model = Spann3R(dus3r_name=args.dust3r_ckpt, use_feat=False).to(device)
-    checkpoint = torch.load(args.ckpt_path, map_location=device)
+    # Resolve and validate checkpoints
+    dust3r_ckpt = osp.abspath(osp.expanduser(args.dust3r_ckpt)) if args.dust3r_ckpt else None
+    spann3r_ckpt = osp.abspath(osp.expanduser(args.ckpt_path)) if args.ckpt_path else None
+
+    # If user accidentally passed DUSt3R to --ckpt_path, try to detect and warn
+    if (dust3r_ckpt is None or not osp.isfile(dust3r_ckpt)) and (
+        spann3r_ckpt and osp.isfile(spann3r_ckpt) and "DUSt3R" in osp.basename(spann3r_ckpt)
+    ):
+        print(
+            f"Detected DUSt3R checkpoint at --ckpt_path: '{spann3r_ckpt}'. "
+            "Using it as --dust3r_ckpt. Please also pass --ckpt_path to Spann3R .pth.",
+            flush=True,
+        )
+        dust3r_ckpt = spann3r_ckpt
+
+    if not (dust3r_ckpt and osp.isfile(dust3r_ckpt)):
+        raise FileNotFoundError(
+            f"DUSt3R checkpoint not found: '{args.dust3r_ckpt}'. "
+            "Provide a valid path via --dust3r_ckpt."
+        )
+
+    if not (spann3r_ckpt and osp.isfile(spann3r_ckpt)):
+        raise FileNotFoundError(
+            f"Spann3R checkpoint not found: '{args.ckpt_path}'. "
+            "Provide the trained Spann3R weights .pth via --ckpt_path."
+        )
+
+    model = Spann3R(dus3r_name=dust3r_ckpt, use_feat=False).to(device)
+    checkpoint = torch.load(spann3r_ckpt, map_location=device)
     state_dict = (
         checkpoint["model"]
         if isinstance(checkpoint, dict) and "model" in checkpoint
