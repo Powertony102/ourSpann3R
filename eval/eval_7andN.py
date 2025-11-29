@@ -28,8 +28,6 @@ from spann3r.model import Spann3R
 from spann3r.tools.eval_recon import accuracy, completion
 
 from vggt.utils.eval_utils import build_frame_selection, load_images_rgb
-
-# Suppress OpenCV imread warnings
 try:
     if hasattr(cv2, "utils") and hasattr(cv2.utils, "logging"):
         cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
@@ -147,7 +145,7 @@ def main(args):
             resolution=resolution,
             num_seq=1,
             full_video=True,
-            kf_every=args.kf,
+            kf_every=1,
         ),  # 20),
         "NRGBD": NRGBD(
             split="test",
@@ -155,7 +153,7 @@ def main(args):
             resolution=resolution,
             num_seq=1,
             full_video=True,
-            kf_every=args.kf,
+            kf_every=1,
         ),
     }
 
@@ -247,7 +245,7 @@ def main(args):
                 labels = []
                 for v in batch:
                     try:
-                        labels.append(v["label"][0])
+                        labels.append(v["label"])
                     except Exception:
                         labels.append("")
 
@@ -426,7 +424,7 @@ def main(args):
                 masks_all = np.concatenate(masks_all, axis=0)
                 conf_all = np.concatenate(conf_all, axis=0)
 
-                scene_id = view["label"][0].rsplit("/", 1)[0]
+                scene_id = view["label"].rsplit("/", 1)[0]
                 # Record FPS per scene for averaging later
                 try:
                     scene_infer_times[scene_id].append(float(fps))
