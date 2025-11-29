@@ -14,6 +14,7 @@ import argparse
 import numpy as np
 import open3d as o3d
 import os.path as osp
+import cv2
 from torch.utils.data._utils.collate import default_collate
 from tqdm import tqdm
 from collections import defaultdict
@@ -27,6 +28,13 @@ from spann3r.model import Spann3R
 from spann3r.tools.eval_recon import accuracy, completion
 
 from vggt.utils.eval_utils import build_frame_selection, load_images_rgb
+
+# Suppress OpenCV imread warnings
+try:
+    if hasattr(cv2, "utils") and hasattr(cv2.utils, "logging"):
+        cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+except Exception:
+    pass
 
 
 def get_args_parser():
@@ -256,6 +264,9 @@ def main(args):
                     synthetic_paths,
                     available_pose_frame_ids,
                     args.input_frame,
+                )
+                print(
+                    f"[FrameSelection] total_frames={len(available_pose_frame_ids)} selected_ids={sel_frame_ids}"
                 )
                 if len(sel_indices) > 0:
                     batch = [batch[i] for i in sel_indices]
