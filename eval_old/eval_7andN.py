@@ -6,27 +6,27 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
+EVAL_OLD_DIR = os.path.abspath(os.path.dirname(__file__))
+if EVAL_OLD_DIR not in sys.path:
+    sys.path.insert(0, EVAL_OLD_DIR)
+
+FAST3R_PROJECT_DIR = os.path.abspath(os.path.join(ROOT_DIR, "fast3r"))
+FAST3R_PKG_DIR = os.path.abspath(os.path.join(ROOT_DIR, "fast3r", "fast3r"))
+for p in (FAST3R_PROJECT_DIR, FAST3R_PKG_DIR):
+    if p not in sys.path:
+        sys.path.append(p)
+
 import time
-import re
-from pathlib import Path
 import torch
 import argparse
 import numpy as np
 import open3d as o3d
 import os.path as osp
+from torch.utils.data import DataLoader
 from torch.utils.data._utils.collate import default_collate
 from tqdm import tqdm
 from collections import defaultdict
-import hashlib
-
-from dust3r.losses import L21
-from dust3r.utils.geometry import geotrf
-from spann3r.datasets import SevenScenes, NRGBD
-from spann3r.loss import Regr3D_t_ScaleShiftInv
-from spann3r.model import Spann3R
-from spann3r.tools.eval_recon import accuracy, completion
-
-from vggt.utils.eval_utils import build_frame_selection, load_images_rgb
+import torchvision.transforms as transforms
 
 
 def get_args_parser():
@@ -34,81 +34,36 @@ def get_args_parser():
     parser.add_argument(
         "--ckpt_path",
         type=str,
-        default="./checkpoints/spann3r.pth",
-        help="path to Spann3R checkpoint",
+        default="./ckpt/model_tracker_fixed_e20.pt",
+        help="ckpt name",
     )
     parser.add_argument("--device", type=str, default="cuda:0", help="device")
+    parser.add_argument("--model_name", type=str, default="VGGT")
     parser.add_argument(
         "--conf_thresh", type=float, default=0.0, help="confidence threshold"
     )
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="./outputs/eval_7andN_span3r/",
+        default="./outputs/eval_7andN/",
         help="value for outdir",
     )
     parser.add_argument("--size", type=int, default=518)
     parser.add_argument("--revisit", type=int, default=1, help="revisit times")
+    parser.add_argument("--freeze", action="store_true")
     parser.add_argument("--use_proj", action="store_true")
-    parser.add_argument("--kf", type=int, default=2, help="key frame")
-    parser.add_argument("--input_frame", type=int, default=200, help="max frames per scene")
     parser.add_argument(
-        "--dust3r_ckpt",
-        type=str,
-        default="./checkpoints/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth",
-        help="path to DUSt3R backbone checkpoint",
+        "--merging", type=int, default=0, help="VGGT aggregator merging steps"
     )
+    parser.add_argument("--kf", type=int, default=2, help="key frame")
+    parser.add_argument("--nrgbd_root", type=str, default="/home/jovyan/shared/xinzeli/fastplus/nrgbd/")
+    # parser.add_argument("--7scenes_root", type=str, default="/home/jovyan/shared/xinzeli/fastplus/7-scenes")
     return parser
 
 
-def _safe_torch_load(path, map_location):
-    try:
-        obj = torch.load(path, map_location=map_location)
-        return obj, None
-    except Exception as e:
-        return None, e
-
-def _file_info(path):
-    try:
-        size = os.path.getsize(path)
-        h = hashlib.sha256()
-        with open(path, "rb") as f:
-            for chunk in iter(lambda: f.read(1 << 20), b""):
-                h.update(chunk)
-        return {"size": size, "sha256": h.hexdigest()}
-    except Exception:
-        return None
-
-def _state_dict_from_checkpoint(obj):
-    if isinstance(obj, dict) and "model" in obj and isinstance(obj["model"], dict):
-        return obj["model"]
-    return obj if isinstance(obj, dict) else None
-
-def _detect_ckpt_kind(state_dict):
-    if not isinstance(state_dict, dict):
-        return "unknown"
-    keys = list(state_dict.keys())
-    if any(k.startswith("dust3r.") for k in keys) or any(k.startswith("attn_head_1") or k.startswith("value_encoder") for k in keys):
-        return "spann3r"
-    dust_keys = [
-        "mask_token",
-        "patch_embed.proj.weight",
-        "enc_blocks.0.norm1.weight",
-        "dec_blocks.0.norm1.weight",
-        "head1.fc.0.weight",
-    ]
-    if any(k in keys for k in dust_keys) or any(k.startswith("enc_blocks.") or k.startswith("dec_blocks.") or k.startswith("patch_embed.") for k in keys):
-        return "dust3r"
-    return "unknown"
-
-def _print_version_warnings():
-    try:
-        ver = torch.__version__
-        print(f"PyTorch version: {ver}")
-    except Exception:
-        pass
-
 def main(args):
+    from eval_old.data import SevenScenes, NRGBD
+    from eval_old.utils import accuracy, completion
     # Ensure deterministic numpy sampling (e.g., point subsampling)
     np.random.seed(0)
 
@@ -120,18 +75,9 @@ def main(args):
         resolution = (518, 392)
     else:
         raise NotImplementedError
-    
-    """
-    datasets_all = {
-        "7scenes": SevenScenes(
-            split="test",
-            ROOT="/home/jovyan/shared/xinzeli/fastplus/7-scenes",
-            resolution=resolution,
-            num_seq=1,
-            full_video=True,
-            kf_every=args.kf,
-        ),  # 20),
-    """
+    if not osp.isdir(args.nrgbd_root):
+        raise PermissionError(f"NRGBD root not accessible: {args.nrgbd_root}")
+
     datasets_all = {
         "7scenes": SevenScenes(
             split="test",
@@ -143,7 +89,7 @@ def main(args):
         ),  # 20),
         "NRGBD": NRGBD(
             split="test",
-            ROOT="/home/jovyan/shared/xinzeli/fastplus/nrgbd",
+            ROOT=args.nrgbd_root,
             resolution=resolution,
             num_seq=1,
             full_video=True,
@@ -152,67 +98,33 @@ def main(args):
     }
 
     device = args.device
+    model_name = args.model_name
 
-    # Resolve and validate checkpoints
-    dust3r_ckpt = osp.abspath(osp.expanduser(args.dust3r_ckpt)) if args.dust3r_ckpt else None
-    spann3r_ckpt = osp.abspath(osp.expanduser(args.ckpt_path)) if args.ckpt_path else None
+    from vggt.models.vggt import VGGT
+    from vggt.utils.pose_enc import pose_encoding_to_extri_intri
+    from vggt.utils.geometry import unproject_depth_map_to_point_map
+    from criterion import Regr3D_t_ScaleShiftInv, L21
 
-    # If user accidentally passed DUSt3R to --ckpt_path, try to detect and warn
-    if (dust3r_ckpt is None or not osp.isfile(dust3r_ckpt)) and (
-        spann3r_ckpt and osp.isfile(spann3r_ckpt) and "DUSt3R" in osp.basename(spann3r_ckpt)
-    ):
-        print(
-            f"Detected DUSt3R checkpoint at --ckpt_path: '{spann3r_ckpt}'. Using it as --dust3r_ckpt.",
-            flush=True,
-        )
-        dust3r_ckpt = spann3r_ckpt
+    dtype = torch.bfloat16
+    if model_name.upper() == "VGGT":
+        model = VGGT(merging=args.merging, enable_point=True)
+        ckpt = torch.load(args.ckpt_path, map_location="cpu")
+        model.load_state_dict(ckpt, strict=False)
+        model = model.cuda().eval()
+        model = model.to(torch.bfloat16)
+        del ckpt
+    elif model_name.upper() == "FAST3R":
+        from fast3r.dust3r.inference_multiview import inference as fast3r_inference
+        from fast3r.models.fast3r import Fast3R
+        from fast3r.models.multiview_dust3r_module import MultiViewDUSt3RLitModule
 
-    if not (dust3r_ckpt and osp.isfile(dust3r_ckpt)):
-        raise FileNotFoundError(
-            f"DUSt3R checkpoint not found: '{args.dust3r_ckpt}'. Provide a valid path via --dust3r_ckpt."
-        )
-
-    skip_spann3r_load = False
-    if not (spann3r_ckpt and osp.isfile(spann3r_ckpt)):
-        print(
-            f"Spann3R checkpoint not found: '{args.ckpt_path}'. Proceeding without loading Spann3R-specific weights.",
-            flush=True,
-        )
-        skip_spann3r_load = True
-
-    _print_version_warnings()
-    info_dust = _file_info(dust3r_ckpt)
-    if info_dust:
-        print(f"DUSt3R ckpt size: {info_dust['size']} bytes, sha256: {info_dust['sha256']}")
-    model = Spann3R(dus3r_name=dust3r_ckpt, use_feat=False).to(device)
-    if not skip_spann3r_load:
-        obj, err = _safe_torch_load(spann3r_ckpt, map_location=device)
-        if err is not None:
-            print(f"Failed to load Spann3R checkpoint: {err}. Skipping load.")
-            skip_spann3r_load = True
-        else:
-            info_span = _file_info(spann3r_ckpt)
-            if info_span:
-                print(f"Spann3R ckpt size: {info_span['size']} bytes, sha256: {info_span['sha256']}")
-            sd = _state_dict_from_checkpoint(obj)
-            kind = _detect_ckpt_kind(sd)
-            if kind == "dust3r":
-                print("Checkpoint appears to be DUSt3R-only. Backbone already loaded. Skipping Spann3R load.")
-                skip_spann3r_load = True
-            elif kind == "spann3r":
-                try:
-                    model.load_state_dict(sd)
-                except Exception as e:
-                    print(f"Strict load failed: {e}. Retrying with non-strict.")
-                    missing, unexpected = model.load_state_dict(sd, strict=False)
-                    if missing:
-                        print(f"Missing keys: {len(missing)}")
-                    if unexpected:
-                        print(f"Unexpected keys: {len(unexpected)}")
-            else:
-                print("Unknown checkpoint format. Skipping Spann3R load.")
-                skip_spann3r_load = True
-    model.eval()
+        device_obj = torch.device(device)
+        model = Fast3R.from_pretrained("jedyang97/Fast3R_ViT_Large_512")
+        model = model.to(device_obj).to(torch.bfloat16).eval()
+        lit_module = MultiViewDUSt3RLitModule.load_for_inference(model)
+        lit_module.eval()
+    else:
+        raise ValueError(f"Unsupported model_name: {model_name}")
     os.makedirs(osp.join(args.output_dir, f"{args.kf}"), exist_ok=True)
 
     criterion = Regr3D_t_ScaleShiftInv(L21, norm_mode=False, gt_scale=True)
@@ -235,35 +147,6 @@ def main(args):
 
             for data_idx in tqdm(range(len(dataset))):
                 batch = default_collate([dataset[data_idx]])
-
-                labels = []
-                for v in batch:
-                    try:
-                        labels.append(v["label"][0])
-                    except Exception:
-                        labels.append("")
-
-                frame_ids = []
-                for i, lbl in enumerate(labels):
-                    stem = Path(lbl).stem
-                    nums = re.findall(r"\d+", stem)
-                    fid = int(nums[0]) if len(nums) > 0 else i
-                    frame_ids.append(fid)
-
-                synthetic_paths = [Path(f"/__synthetic__/{fid}.png") for fid in frame_ids]
-                available_pose_frame_ids = np.array(frame_ids)
-                sel_frame_ids, _, sel_indices = build_frame_selection(
-                    synthetic_paths,
-                    available_pose_frame_ids,
-                    args.input_frame,
-                )
-                if len(sel_indices) > 0:
-                    batch = [batch[i] for i in sel_indices]
-                    sel_image_paths = [Path(labels[i]) for i in sel_indices]
-                    try:
-                        _ = load_images_rgb(sel_image_paths)
-                    except Exception:
-                        pass
                 ignore_keys = set(
                     [
                         "depthmap",
@@ -295,125 +178,195 @@ def main(args):
                 conf_all = []
                 in_camera1 = None
 
-                should_sync = device.startswith("cuda") and torch.cuda.is_available()
-                if should_sync:
-                    start_event = torch.cuda.Event(enable_timing=True)
-                    end_event = torch.cuda.Event(enable_timing=True)
-                    start_event.record()
-                else:
-                    start_time = time.time()
-                preds, preds_all = model.forward(batch)
-                if should_sync:
-                    end_event.record()
-                    torch.cuda.synchronize()
-                    elapsed_ms = start_event.elapsed_time(end_event)
-                    elapsed_s = elapsed_ms / 1000.0
-                else:
-                    elapsed_s = time.time() - start_time
-                frame_count = len(batch)
-                fps = frame_count / elapsed_s if elapsed_s > 0 else float("inf")
-                print(f"Inference FPS (frames/s): {fps:.2f}")
+                if model_name.upper() == "VGGT":
+                    dtype_autocast = (
+                        torch.bfloat16
+                        if torch.cuda.get_device_capability()[0] >= 8
+                        else torch.float16
+                    )
+                    with torch.cuda.amp.autocast(dtype=dtype_autocast):
+                        if isinstance(batch, dict) and "img" in batch:
+                            batch["img"] = (batch["img"] + 1.0) / 2.0
+                        elif isinstance(batch, list) and all(
+                            isinstance(v, dict) and "img" in v for v in batch
+                        ):
+                            for view in batch:
+                                view["img"] = (view["img"] + 1.0) / 2.0
+                            imgs_tensor = torch.cat([v["img"] for v in batch], dim=0)
 
-                valid_length = len(preds) // args.revisit
-                if args.revisit > 1 and valid_length > 0:
-                    preds = preds[-valid_length:]
-                    batch = batch[-valid_length:]
-                    if preds_all:
-                        keep_pairs = max(len(preds) - 1, 0)
-                        preds_all = preds_all[-keep_pairs:] if keep_pairs > 0 else []
+                    with torch.cuda.amp.autocast(dtype=dtype_autocast):
+                        with torch.no_grad():
+                            torch.cuda.synchronize()
+                            start = time.time()
+                            predictions = model(imgs_tensor)
+                            torch.cuda.synchronize()
+                            end = time.time()
+                            elapsed_s = end - start
+                            frame_count = imgs_tensor.shape[0]
+                            fps = (
+                                frame_count / elapsed_s if elapsed_s > 0 else float("inf")
+                            )
+                            print(f"Inference FPS (frames/s): {fps:.2f}")
 
-                # Evaluation
-                print(f"Evaluation for {name_data} {data_idx+1}/{len(dataset)}")
-                gt_pts, pred_pts, gt_factor, pr_factor, masks, monitoring = (
-                    criterion.get_all_pts3d_t(batch, preds_all)
-                )
-
-                gt_shift_value = None
-                if monitoring and "gt_shift_z" in monitoring:
-                    gt_shift = monitoring["gt_shift_z"]
-                    if torch.is_tensor(gt_shift):
-                        gt_shift_value = float(gt_shift.detach().cpu().mean())
+                    views = batch
+                    if "pose_enc" in predictions:
+                        B, S = predictions["pose_enc"].shape[:2]
+                    elif "world_points" in predictions:
+                        B, S = predictions["world_points"].shape[:2]
                     else:
-                        gt_shift_value = float(gt_shift)
+                        raise KeyError(
+                            "predictions is missing a key to infer sequence length"
+                        )
 
-                in_camera1 = None
-                pts_all = []
-                pts_gt_all = []
-                images_all = []
-                masks_all = []
-                conf_all = []
-
-                if isinstance(pred_pts, (list, tuple)) and len(pred_pts) == 2:
-                    pred_pts_l, pred_pts_r = pred_pts
+                    ress = []
+                    for s in range(S):
+                        res = {
+                            "pts3d_in_other_view": predictions["world_points"][:, s],
+                            "conf": predictions["world_points_conf"][:, s],
+                            "depth": predictions["depth"][:, s],
+                            "depth_conf": predictions["depth_conf"][:, s],
+                            "camera_pose": predictions["pose_enc"][:, s, :],
+                        }
+                        if (
+                            isinstance(views, list)
+                            and s < len(views)
+                            and "valid_mask" in views[s]
+                        ):
+                            res["valid_mask"] = views[s]["valid_mask"]
+                        if "track" in predictions:
+                            res.update(
+                                {
+                                    "track": predictions["track"][:, s],
+                                    "vis": (
+                                        predictions.get("vis", None)[:, s]
+                                        if "vis" in predictions
+                                        else None
+                                    ),
+                                    "track_conf": (
+                                        predictions.get("conf", None)[:, s]
+                                        if "conf" in predictions
+                                        else None
+                                    ),
+                                }
+                            )
+                        ress.append(res)
+                    preds = ress
                 else:
-                    pred_pts_l, pred_pts_r = pred_pts, None
+                    views = batch
+                    try:
+                        fast3r_views = []
+                        for v in views:
+                            img_batched = v["img"]
+                            true_shape_batched = v.get("true_shape")
+                            idx_val = v.get("idx", 0)
+                            if torch.is_tensor(idx_val):
+                                idx_val = int(idx_val.item())
+                            else:
+                                idx_val = int(idx_val)
+                            fast3r_views.append(
+                                dict(
+                                    img=img_batched,
+                                    true_shape=true_shape_batched,
+                                    idx=idx_val,
+                                    instance=str(v.get("instance", "")),
+                                )
+                            )
 
-                for j, view in enumerate(batch):
-                    if in_camera1 is None:
-                        in_camera1 = view["camera_pose"][0].cpu()
+                        torch.cuda.synchronize()
+                        start = time.time()
+                        output_dict, profiling_info = fast3r_inference(
+                            fast3r_views,
+                            model,
+                            device_obj,
+                            dtype=torch.bfloat16,
+                            verbose=False,
+                            profiling=True,
+                        )
+                        torch.cuda.synchronize()
+                        end = time.time()
+                        total_time = (
+                            profiling_info.get("total_time", None)
+                            if isinstance(profiling_info, dict)
+                            else None
+                        )
+                        elapsed_s = total_time if (total_time and total_time > 0) else (end - start)
+                        frame_count = len(fast3r_views)
+                        fps = frame_count / elapsed_s if elapsed_s > 0 else float("inf")
+                        print(f"Inference FPS (frames/s): {fps:.2f}")
 
-                    image = view["img"].permute(0, 2, 3, 1).cpu().numpy()[0]
-                    mask = view["valid_mask"].cpu().numpy()[0]
+                        preds_raw = output_dict["preds"]
+                        ress = []
+                        for s, pred in enumerate(preds_raw):
+                            pts = pred["pts3d_in_other_view"]
+                            conf = pred.get("conf", None)
+                            res = {
+                                "pts3d_in_other_view": pts,
+                                "conf": conf if conf is not None else torch.ones_like(pts[..., 0]),
+                            }
+                            if (
+                                isinstance(views, list)
+                                and s < len(views)
+                                and "valid_mask" in views[s]
+                            ):
+                                res["valid_mask"] = views[s]["valid_mask"]
+                            ress.append(res)
+                        preds = ress
+                    except Exception as e:
+                        print(f"Fast3R inference failed: {e}")
+                        continue
 
-                    if pred_pts_r is not None:
-                        if j < len(pred_pts_l):
-                            pts_tensor = pred_pts_l[j]
-                        else:
-                            pts_tensor = pred_pts_r[-1]
-                    else:
-                        pts_tensor = pred_pts_l[j]
+                    valid_length = len(preds) // args.revisit
+                    if args.revisit > 1:
+                        preds = preds[-valid_length:]
+                        batch = batch[-valid_length:]
 
-                    pts = pts_tensor.detach().cpu().numpy()[0]
-                    conf_tensor = preds[j]["conf"]
-                    if torch.is_tensor(conf_tensor):
-                        if conf_tensor.ndim == 3:
-                            conf = conf_tensor[0].detach().cpu().numpy()
-                        else:
-                            conf = conf_tensor.detach().cpu().numpy()
-                    else:
-                        conf = np.asarray(conf_tensor)
-                    pts_gt = gt_pts[j].detach().cpu().numpy()[0]
+                    # Evaluation
+                    print(f"Evaluation for {name_data} {data_idx+1}/{len(dataset)}")
+                    gt_pts, pred_pts, gt_factor, pr_factor, masks, monitoring = (
+                        criterion.get_all_pts3d_t(batch, preds)
+                    )
 
-                    if gt_shift_value is not None:
-                        pts[..., 2] += gt_shift_value
-                        pts_gt[..., 2] += gt_shift_value
+                    in_camera1 = None
+                    pts_all = []
+                    pts_gt_all = []
+                    images_all = []
+                    masks_all = []
+                    conf_all = []
 
-                    if in_camera1 is not None:
-                        pts_trf = geotrf(in_camera1, pts)
-                        pts_gt_trf = geotrf(in_camera1, pts_gt)
-                        if torch.is_tensor(pts_trf):
-                            pts = pts_trf.detach().cpu().numpy()
-                        else:
-                            pts = np.asarray(pts_trf)
-                        if torch.is_tensor(pts_gt_trf):
-                            pts_gt = pts_gt_trf.detach().cpu().numpy()
-                        else:
-                            pts_gt = np.asarray(pts_gt_trf)
+                    for j, view in enumerate(batch):
+                        if in_camera1 is None:
+                            in_camera1 = view["camera_pose"][0].cpu()
 
-                    H, W = image.shape[:2]
-                    cx = W // 2
-                    cy = H // 2
-                    l, t = cx - 112, cy - 112
-                    r, b = cx + 112, cy + 112
-                    image = image[t:b, l:r]
-                    mask = mask[t:b, l:r]
-                    pts = pts[t:b, l:r]
-                    pts_gt = pts_gt[t:b, l:r]
-                    conf = conf[t:b, l:r]
+                        image = view["img"].permute(0, 2, 3, 1).cpu().numpy()[0]
+                        mask = view["valid_mask"].cpu().numpy()[0]
 
-                    image = (image + 1.0) / 2.0
+                        pts = pred_pts[j].to(torch.float32).cpu().numpy()[0]
+                        conf = preds[j]["conf"].to(torch.float32).cpu().data.numpy()[0]
 
-                    images_all.append(image[None, ...])
-                    pts_all.append(pts[None, ...])
-                    pts_gt_all.append(pts_gt[None, ...])
-                    masks_all.append(mask[None, ...])
-                    conf_all.append(conf[None, ...])
+                        # mask = mask & (conf > 1.8)
+
+                        pts_gt = gt_pts[j].detach().to(torch.float32).cpu().numpy()[0]
+
+                        H, W = image.shape[:2]
+                        cx = W // 2
+                        cy = H // 2
+                        l, t = cx - 112, cy - 112
+                        r, b = cx + 112, cy + 112
+                        image = image[t:b, l:r]
+                        mask = mask[t:b, l:r]
+                        pts = pts[t:b, l:r]
+                        pts_gt = pts_gt[t:b, l:r]
+
+                        images_all.append(image[None, ...])
+                        pts_all.append(pts[None, ...])
+                        pts_gt_all.append(pts_gt[None, ...])
+                        masks_all.append(mask[None, ...])
+                        conf_all.append(conf[None, ...])
 
                 images_all = np.concatenate(images_all, axis=0)
                 pts_all = np.concatenate(pts_all, axis=0)
                 pts_gt_all = np.concatenate(pts_gt_all, axis=0)
                 masks_all = np.concatenate(masks_all, axis=0)
-                conf_all = np.concatenate(conf_all, axis=0)
 
                 scene_id = view["label"][0].rsplit("/", 1)[0]
                 # Record FPS per scene for averaging later
@@ -428,7 +381,6 @@ def main(args):
                 save_params["pts_all"] = pts_all
                 save_params["pts_gt_all"] = pts_gt_all
                 save_params["masks_all"] = masks_all
-                save_params["conf_all"] = conf_all
 
                 pts_all_masked = pts_all[masks_all > 0]
                 pts_gt_all_masked = pts_gt_all[masks_all > 0]

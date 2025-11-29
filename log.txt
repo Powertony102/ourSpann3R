@@ -1,0 +1,514 @@
+(speedy-vggt) jovyan@9d80f0213870:~/work/furina/ourVGGT$ python eval_old/eval_scannet_fast3r.py --device cuda:1 --output_path ./eval_results_1115 --input_frame 1000 --num_scenes 50
+Warning, cannot find cuda-compiled version of RoPE2D, using a slow pytorch version instead
+/opt/conda/envs/speedy-vggt/lib/python3.10/site-packages/pl_bolts/__init__.py:11: FutureWarning: In the future `np.object` will be defined as the corresponding NumPy scalar.
+  if not hasattr(numpy, tp_name):
+/opt/conda/envs/speedy-vggt/lib/python3.10/site-packages/pl_bolts/__init__.py:11: FutureWarning: In the future `np.bool` will be defined as the corresponding NumPy scalar.
+  if not hasattr(numpy, tp_name):
+/opt/conda/envs/speedy-vggt/lib/python3.10/site-packages/lightning_fabric/__init__.py:29: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+/opt/conda/envs/speedy-vggt/lib/python3.10/site-packages/pl_bolts/models/self_supervised/amdim/amdim_module.py:34: UnderReviewWarning: The feature generate_power_seq is currently marked under review. The compatibility with other Lightning projects is not guaranteed and API may change at any time. The API and functionality may change without warning in future releases. More details: https://lightning-bolts.readthedocs.io/en/latest/stability.html
+  "lr_options": generate_power_seq(LEARNING_RATE_CIFAR, 11),
+/opt/conda/envs/speedy-vggt/lib/python3.10/site-packages/pl_bolts/models/self_supervised/amdim/amdim_module.py:92: UnderReviewWarning: The feature FeatureMapContrastiveTask is currently marked under review. The compatibility with other Lightning projects is not guaranteed and API may change at any time. The API and functionality may change without warning in future releases. More details: https://lightning-bolts.readthedocs.io/en/latest/stability.html
+  contrastive_task: Union[FeatureMapContrastiveTask] = FeatureMapContrastiveTask("01, 02, 11"),
+/opt/conda/envs/speedy-vggt/lib/python3.10/site-packages/pl_bolts/losses/self_supervised_learning.py:228: UnderReviewWarning: The feature AmdimNCELoss is currently marked under review. The compatibility with other Lightning projects is not guaranteed and API may change at any time. The API and functionality may change without warning in future releases. More details: https://lightning-bolts.readthedocs.io/en/latest/stability.html
+  self.nce_loss = AmdimNCELoss(tclip)
+Evaluate 50 scenes
+Warning: No pose files (.txt) found in directory /home/jovyan/shared/xinzeli/scannetv2/process_scannet/.ipynb_checkpoints/pose
+Skipping scene .ipynb_checkpoints: no pose data
+🚩Processing scene0000_00 Found 1000 images
+encode_images time: 15.117533922195435
+pos emb time: 0.1283707618713379
+decoder time: 0.14453411102294922
+head prepare input time: 0.0018820762634277344
+head forward time: 334.79547595977783
+total Fast3R forward time: 350.18942189216614
+Inference FPS (frames/s): 2.86 [2025-11-15 03:53:13]
+Complete metrics {'ate': 2.7207073374224584, 'are': 115.42655817015485, 'rpe_rot': 57.80557412761139, 'rpe_trans': 0.4795862605679231, 'chamfer_distance': 0.7515150058981773, 'inference_time_ms': 350189.42189216614, 'fps': 2.8555973923961933}
+🚩Processing scene0013_02 Found 1000 images
+encode_images time: 5.36272406578064
+pos emb time: 0.13299870491027832
+decoder time: 0.09112977981567383
+head prepare input time: 0.0003829002380371094
+head forward time: 334.98171186447144
+total Fast3R forward time: 340.56947016716003
+Inference FPS (frames/s): 2.94 [2025-11-15 04:00:19]
+Complete metrics {'ate': 2.6687997334601268, 'are': 109.02043584501247, 'rpe_rot': 16.417353500999152, 'rpe_trans': 0.4618063624340259, 'chamfer_distance': 0.5290684438584633, 'inference_time_ms': 340569.47016716003, 'fps': 2.936258495246726}
+🚩Processing scene0029_01 Found 1000 images
+encode_images time: 5.351489305496216
+pos emb time: 0.13057875633239746
+decoder time: 0.09143304824829102
+head prepare input time: 0.00042557716369628906
+head forward time: 335.39368724823
+total Fast3R forward time: 340.96849727630615
+Inference FPS (frames/s): 2.93 [2025-11-15 04:07:29]
+Complete metrics {'ate': 0.44068890890354523, 'are': 97.60949526757689, 'rpe_rot': 27.22566606200854, 'rpe_trans': 0.15217726192815537, 'chamfer_distance': 0.44067059018820753, 'inference_time_ms': 340968.49727630615, 'fps': 2.9328222636053183}
+🚩Processing scene0042_02 Found 1000 images
+encode_images time: 5.353469133377075
+pos emb time: 0.13591670989990234
+decoder time: 0.08990931510925293
+head prepare input time: 0.00039458274841308594
+head forward time: 334.3915536403656
+total Fast3R forward time: 339.97192096710205
+Inference FPS (frames/s): 2.94 [2025-11-15 04:14:44]
+Complete metrics {'ate': 0.722259212315983, 'are': 102.76057312849787, 'rpe_rot': 34.38073135804814, 'rpe_trans': 0.26072152971150436, 'chamfer_distance': 0.46873480415579244, 'inference_time_ms': 339971.92096710205, 'fps': 2.941419388858195}
+🚩Processing scene0056_00 Found 1000 images
+encode_images time: 5.358114242553711
+pos emb time: 0.13367843627929688
+decoder time: 0.08824801445007324
+head prepare input time: 0.0003807544708251953
+head forward time: 335.4120361804962
+total Fast3R forward time: 340.99422454833984
+Inference FPS (frames/s): 2.93 [2025-11-15 04:21:58]
+Complete metrics {'ate': 3.755676037510064, 'are': 98.27892050383963, 'rpe_rot': 17.092057782694802, 'rpe_trans': 1.1622270577450848, 'chamfer_distance': 0.7797369735837794, 'inference_time_ms': 340994.22454833984, 'fps': 2.932600988549114}
+🚩Processing scene0071_00 Found 1000 images
+encode_images time: 5.353704214096069
+pos emb time: 0.13343095779418945
+decoder time: 0.08848738670349121
+head prepare input time: 0.0003864765167236328
+head forward time: 335.45717430114746
+total Fast3R forward time: 341.03372073173523
+Inference FPS (frames/s): 2.93 [2025-11-15 04:29:05]
+Complete metrics {'ate': 2.1362215920008687, 'are': 92.56713380441494, 'rpe_rot': 39.8351488071424, 'rpe_trans': 0.8302106528450179, 'chamfer_distance': 0.9023795427584164, 'inference_time_ms': 341033.72073173523, 'fps': 2.9322613548430376}
+🚩Processing scene0084_01 Found 1000 images
+encode_images time: 5.358109951019287
+pos emb time: 0.13075661659240723
+decoder time: 0.08875608444213867
+head prepare input time: 0.0003681182861328125
+head forward time: 334.49349331855774
+total Fast3R forward time: 340.07193899154663
+Inference FPS (frames/s): 2.94 [2025-11-15 04:36:21]
+Complete metrics {'ate': 1.2165254628986792, 'are': 100.68516207310891, 'rpe_rot': 19.310128814080276, 'rpe_trans': 0.4016291162333539, 'chamfer_distance': 0.5421598511670211, 'inference_time_ms': 340071.93899154663, 'fps': 2.940554292616474}
+🚩Processing scene0096_00 Found 1000 images
+encode_images time: 5.35235595703125
+pos emb time: 0.13043618202209473
+decoder time: 0.08863615989685059
+head prepare input time: 0.0003795623779296875
+head forward time: 334.8118269443512
+total Fast3R forward time: 340.38556456565857
+Inference FPS (frames/s): 2.94 [2025-11-15 04:43:20]
+Complete metrics {'ate': 1.517910885073481, 'are': 78.2769270009736, 'rpe_rot': 35.883090406704326, 'rpe_trans': 0.5571169933996553, 'chamfer_distance': 0.5228731546142558, 'inference_time_ms': 340385.56456565857, 'fps': 2.937844915004042}
+🚩Processing scene0109_00 Found 1000 images
+encode_images time: 5.3533408641815186
+pos emb time: 0.1297464370727539
+decoder time: 0.08854866027832031
+head prepare input time: 0.0003783702850341797
+head forward time: 334.5817697048187
+total Fast3R forward time: 340.15433073043823
+Inference FPS (frames/s): 2.94 [2025-11-15 04:50:37]
+Complete metrics {'ate': 1.456201126195155, 'are': 110.95553946066154, 'rpe_rot': 22.246772815385803, 'rpe_trans': 0.38941736207097083, 'chamfer_distance': 0.5572665703479625, 'inference_time_ms': 340154.33073043823, 'fps': 2.9398420353861936}
+🚩Processing scene0121_01 Found 1000 images
+encode_images time: 5.357019424438477
+pos emb time: 0.1304001808166504
+decoder time: 0.08828997611999512
+head prepare input time: 0.0003764629364013672
+head forward time: 334.5003123283386
+total Fast3R forward time: 340.0769681930542
+Inference FPS (frames/s): 2.94 [2025-11-15 04:57:50]
+Complete metrics {'ate': 0.6332646851458343, 'are': 76.35346571725717, 'rpe_rot': 34.992435964949216, 'rpe_trans': 0.09524966819049911, 'chamfer_distance': 0.6725957025543574, 'inference_time_ms': 340076.9681930542, 'fps': 2.9405108064605012}
+🚩Processing scene0136_01 Found 787 images
+encode_images time: 4.166900396347046
+pos emb time: 0.10328245162963867
+decoder time: 0.07443380355834961
+head prepare input time: 0.0004215240478515625
+head forward time: 205.59351348876953
+total Fast3R forward time: 209.93897891044617
+Inference FPS (frames/s): 3.75 [2025-11-15 05:02:36]
+Complete metrics {'ate': 0.7094693738420084, 'are': 77.04273957296108, 'rpe_rot': 34.84067012142908, 'rpe_trans': 0.3244323055084534, 'chamfer_distance': 0.5025116348771345, 'inference_time_ms': 209938.97891044617, 'fps': 3.748708334604748}
+🚩Processing scene0151_00 Found 1000 images
+encode_images time: 5.373586416244507
+pos emb time: 0.13492465019226074
+decoder time: 0.08904457092285156
+head prepare input time: 0.0003256797790527344
+head forward time: 335.74832010269165
+total Fast3R forward time: 341.346853017807
+Inference FPS (frames/s): 2.93 [2025-11-15 05:09:43]
+Complete metrics {'ate': 4.645119976790375, 'are': 104.64526409972638, 'rpe_rot': 51.02787449535786, 'rpe_trans': 1.1982759536647072, 'chamfer_distance': 0.8235997600549123, 'inference_time_ms': 341346.853017807, 'fps': 2.9295714642133617}
+🚩Processing scene0164_01 Found 825 images
+encode_images time: 4.4591965675354
+pos emb time: 0.11427140235900879
+decoder time: 0.09830141067504883
+head prepare input time: 0.0006818771362304688
+head forward time: 226.26496148109436
+total Fast3R forward time: 230.93826913833618
+Inference FPS (frames/s): 3.57 [2025-11-15 05:14:51]
+Complete metrics {'ate': 0.36178359386302905, 'are': 89.39993612889697, 'rpe_rot': 27.026003058959194, 'rpe_trans': 0.10549206181374754, 'chamfer_distance': 0.47785053832621216, 'inference_time_ms': 230938.26913833618, 'fps': 3.5723832307143955}
+🚩Processing scene0177_01 Found 1000 images
+encode_images time: 5.36643123626709
+pos emb time: 0.13149476051330566
+decoder time: 0.08880376815795898
+head prepare input time: 0.0004150867462158203
+head forward time: 335.0155348777771
+total Fast3R forward time: 340.60329604148865
+Inference FPS (frames/s): 2.94 [2025-11-15 05:21:56]
+Complete metrics {'ate': 0.9970053016591554, 'are': 99.89877687940242, 'rpe_rot': 9.710316301807602, 'rpe_trans': 0.16763980904005354, 'chamfer_distance': 0.5972344127439939, 'inference_time_ms': 340603.29604148865, 'fps': 2.9359668905793286}
+🚩Processing scene0194_00 Found 1000 images
+encode_images time: 5.358981132507324
+pos emb time: 0.1758565902709961
+decoder time: 0.08935785293579102
+head prepare input time: 0.0003399848937988281
+head forward time: 333.61838483810425
+total Fast3R forward time: 339.24372458457947
+Inference FPS (frames/s): 2.95 [2025-11-15 05:29:06]
+Complete metrics {'ate': 0.545770466002157, 'are': 86.58519444943553, 'rpe_rot': 44.19321944173741, 'rpe_trans': 0.15060667067825037, 'chamfer_distance': 0.8171410988429606, 'inference_time_ms': 339243.72458457947, 'fps': 2.947733229920609}
+🚩Processing scene0207_01 Found 1000 images
+encode_images time: 5.361173152923584
+pos emb time: 0.1305229663848877
+decoder time: 0.09018564224243164
+head prepare input time: 0.0003864765167236328
+head forward time: 334.56368613243103
+total Fast3R forward time: 340.146595954895
+Inference FPS (frames/s): 2.94 [2025-11-15 05:36:01]
+Complete metrics {'ate': 1.2389525030656372, 'are': 102.56338572951823, 'rpe_rot': 66.86978622971358, 'rpe_trans': 0.39375536067838013, 'chamfer_distance': 0.6559483498155023, 'inference_time_ms': 340146.595954895, 'fps': 2.9399088860280833}
+🚩Processing scene0221_01 Found 780 images
+encode_images time: 4.129000425338745
+pos emb time: 0.10392117500305176
+decoder time: 0.0740504264831543
+head prepare input time: 0.00039458274841308594
+head forward time: 201.17511749267578
+total Fast3R forward time: 205.48297810554504
+Inference FPS (frames/s): 3.80 [2025-11-15 05:41:29]
+Complete metrics {'ate': 3.3106432290370664, 'are': 88.28616565432651, 'rpe_rot': 44.618411544673684, 'rpe_trans': 0.48332805943159907, 'chamfer_distance': 0.6437227567602402, 'inference_time_ms': 205482.97810554504, 'fps': 3.795934861326362}
+🚩Processing scene0238_00 Found 586 images
+encode_images time: 3.1257145404815674
+pos emb time: 0.07584786415100098
+decoder time: 0.05906414985656738
+head prepare input time: 0.00039958953857421875
+head forward time: 112.42019510269165
+total Fast3R forward time: 115.68161630630493
+Inference FPS (frames/s): 5.07 [2025-11-15 05:44:56]
+Complete metrics {'ate': 0.45759929466795224, 'are': 94.67595074026816, 'rpe_rot': 7.218271402055258, 'rpe_trans': 0.18879568366368943, 'chamfer_distance': 0.6132981491142229, 'inference_time_ms': 115681.61630630493, 'fps': 5.065627700501463}
+🚩Processing scene0254_01 Found 1000 images
+encode_images time: 5.405794143676758
+pos emb time: 0.13218140602111816
+decoder time: 0.08995246887207031
+head prepare input time: 0.00039315223693847656
+head forward time: 334.96324396133423
+total Fast3R forward time: 340.59230184555054
+Inference FPS (frames/s): 2.94 [2025-11-15 05:51:56]
+Complete metrics {'ate': 1.4953854047550619, 'are': 113.08069308485832, 'rpe_rot': 29.363585811204317, 'rpe_trans': 0.2932202943035844, 'chamfer_distance': 0.6232034738071968, 'inference_time_ms': 340592.30184555054, 'fps': 2.9360616625254}
+🚩Processing scene0267_00 Found 695 images
+encode_images time: 3.6741065979003906
+pos emb time: 0.09062051773071289
+decoder time: 0.08434510231018066
+head prepare input time: 0.0023193359375
+head forward time: 158.5267515182495
+total Fast3R forward time: 162.37872552871704
+Inference FPS (frames/s): 4.28 [2025-11-15 05:55:46]
+Complete metrics {'ate': 0.6897064603686214, 'are': 99.93869931523334, 'rpe_rot': 7.2231476795136, 'rpe_trans': 0.10861418507951152, 'chamfer_distance': 0.7824191867562593, 'inference_time_ms': 162378.72552871704, 'fps': 4.2801173474975185}
+🚩Processing scene0280_00 Found 1000 images
+encode_images time: 5.379225492477417
+pos emb time: 0.13265085220336914
+decoder time: 0.09160089492797852
+head prepare input time: 0.0003921985626220703
+head forward time: 334.89413833618164
+total Fast3R forward time: 340.4987201690674
+Inference FPS (frames/s): 2.94 [2025-11-15 06:02:51]
+Complete metrics {'ate': 0.7632580789901944, 'are': 98.3893579886359, 'rpe_rot': 19.021582303729776, 'rpe_trans': 0.16359221377184988, 'chamfer_distance': 0.6764433646272736, 'inference_time_ms': 340498.7201690674, 'fps': 2.9368686011608833}
+🚩Processing scene0294_02 Found 1000 images
+encode_images time: 5.360865116119385
+pos emb time: 0.13114428520202637
+decoder time: 0.08974456787109375
+head prepare input time: 0.0003845691680908203
+head forward time: 333.2552044391632
+total Fast3R forward time: 338.83795619010925
+Inference FPS (frames/s): 2.95 [2025-11-15 06:09:52]
+Complete metrics {'ate': 1.4633039290842633, 'are': 108.78532646888713, 'rpe_rot': 58.72138023654723, 'rpe_trans': 0.22098626415206468, 'chamfer_distance': 0.7896623429795655, 'inference_time_ms': 338837.95619010925, 'fps': 2.951263226953646}
+🚩Processing scene0309_00 Found 1000 images
+encode_images time: 5.364174842834473
+pos emb time: 0.13116240501403809
+decoder time: 0.08900880813598633
+head prepare input time: 0.00038814544677734375
+head forward time: 334.5077362060547
+total Fast3R forward time: 340.09317350387573
+Inference FPS (frames/s): 2.94 [2025-11-15 06:16:58]
+Complete metrics {'ate': 0.7422535829021676, 'are': 107.24930221351221, 'rpe_rot': 65.28845755894929, 'rpe_trans': 0.18373015559003697, 'chamfer_distance': 0.7250411749746581, 'inference_time_ms': 340093.17350387573, 'fps': 2.940370692235032}
+🚩Processing scene0325_01 Found 1000 images
+encode_images time: 5.3667991161346436
+pos emb time: 0.1349782943725586
+decoder time: 0.09788179397583008
+head prepare input time: 0.0004744529724121094
+head forward time: 333.8527491092682
+total Fast3R forward time: 339.4537274837494
+Inference FPS (frames/s): 2.95 [2025-11-15 06:24:08]
+Complete metrics {'ate': 2.0729683324231445, 'are': 119.25190345065404, 'rpe_rot': 56.00479601276608, 'rpe_trans': 0.2765225154262399, 'chamfer_distance': 0.6339239011776482, 'inference_time_ms': 339453.7274837494, 'fps': 2.9459096160547324}
+🚩Processing scene0340_01 Found 1000 images
+encode_images time: 5.3563923835754395
+pos emb time: 0.13440966606140137
+decoder time: 0.09135651588439941
+head prepare input time: 0.0003688335418701172
+head forward time: 335.0198585987091
+total Fast3R forward time: 340.6048033237457
+Inference FPS (frames/s): 2.94 [2025-11-15 06:31:17]
+Complete metrics {'ate': 0.6356728603362958, 'are': 92.1981361823799, 'rpe_rot': 11.110559441959873, 'rpe_trans': 0.23543465868325475, 'chamfer_distance': 0.4692182354257698, 'inference_time_ms': 340604.8033237457, 'fps': 2.935953898012112}
+🚩Processing scene0353_02 Found 1000 images
+encode_images time: 5.359173774719238
+pos emb time: 0.12947487831115723
+decoder time: 0.09002947807312012
+head prepare input time: 0.0004374980926513672
+head forward time: 334.37642669677734
+total Fast3R forward time: 339.95615124702454
+Inference FPS (frames/s): 2.94 [2025-11-15 06:38:20]
+Complete metrics {'ate': 0.9260862110492363, 'are': 113.60317183422575, 'rpe_rot': 15.719148637570974, 'rpe_trans': 0.17056031783249925, 'chamfer_distance': 0.5640884348247923, 'inference_time_ms': 339956.15124702454, 'fps': 2.9415558339856704}
+🚩Processing scene0367_01 Found 836 images
+encode_images time: 4.5049591064453125
+pos emb time: 0.11282515525817871
+decoder time: 0.07763481140136719
+head prepare input time: 0.0005426406860351562
+head forward time: 233.73999285697937
+total Fast3R forward time: 238.4365267753601
+Inference FPS (frames/s): 3.51 [2025-11-15 06:45:16]
+Complete metrics {'ate': 0.8667482576589671, 'are': 94.81452361056903, 'rpe_rot': 18.879286059186597, 'rpe_trans': 0.19679456972502932, 'chamfer_distance': 0.6042091942392155, 'inference_time_ms': 238436.5267753601, 'fps': 3.5061742062181045}
+🚩Processing scene0380_02 Found 862 images
+encode_images time: 4.665673494338989
+pos emb time: 0.11455559730529785
+decoder time: 0.07939004898071289
+head prepare input time: 0.0003876686096191406
+head forward time: 250.25596499443054
+total Fast3R forward time: 255.1164903640747
+Inference FPS (frames/s): 3.38 [2025-11-15 06:52:01]
+Complete metrics {'ate': 1.0447815596241126, 'are': 86.21110131086711, 'rpe_rot': 11.359149008480289, 'rpe_trans': 0.21614919979613725, 'chamfer_distance': 0.7238764395497023, 'inference_time_ms': 255116.4903640747, 'fps': 3.3788486144891956}
+🚩Processing scene0395_00 Found 1000 images
+encode_images time: 5.371742010116577
+pos emb time: 0.13127517700195312
+decoder time: 0.08838105201721191
+head prepare input time: 0.0003807544708251953
+head forward time: 336.4855647087097
+total Fast3R forward time: 342.07913875579834
+Inference FPS (frames/s): 2.92 [2025-11-15 07:00:29]
+Complete metrics {'ate': 3.029749560687328, 'are': 102.64824984906842, 'rpe_rot': 9.532723284169895, 'rpe_trans': 0.26097106437345224, 'chamfer_distance': 0.7522116781792738, 'inference_time_ms': 342079.13875579834, 'fps': 2.9233001569086468}
+🚩Processing scene0409_01 Found 1000 images
+encode_images time: 5.35610032081604
+pos emb time: 0.12917804718017578
+decoder time: 0.0887141227722168
+head prepare input time: 0.0003643035888671875
+head forward time: 335.7535855770111
+total Fast3R forward time: 341.3284504413605
+Inference FPS (frames/s): 2.93 [2025-11-15 07:07:48]
+Complete metrics {'ate': 2.1900283814518495, 'are': 102.80259289966861, 'rpe_rot': 38.37273555952263, 'rpe_trans': 0.39406848639272507, 'chamfer_distance': 0.76609613444697, 'inference_time_ms': 341328.4504413605, 'fps': 2.929729410797527}
+🚩Processing scene0421_02 Found 1000 images
+encode_images time: 5.3706982135772705
+pos emb time: 0.13195443153381348
+decoder time: 0.0890054702758789
+head prepare input time: 0.0003693103790283203
+head forward time: 334.4939033985138
+total Fast3R forward time: 340.08805894851685
+Inference FPS (frames/s): 2.94 [2025-11-15 07:15:06]
+Complete metrics {'ate': 0.5115519765062634, 'are': 91.17213719708583, 'rpe_rot': 29.34938270392148, 'rpe_trans': 0.1033835489703017, 'chamfer_distance': 0.4776891613527364, 'inference_time_ms': 340088.05894851685, 'fps': 2.9404149122194903}
+🚩Processing scene0435_03 Found 1000 images
+encode_images time: 5.358191013336182
+pos emb time: 0.13448286056518555
+decoder time: 0.0890343189239502
+head prepare input time: 0.0003712177276611328
+head forward time: 336.72623324394226
+total Fast3R forward time: 342.30895018577576
+Inference FPS (frames/s): 2.92 [2025-11-15 07:24:22]
+Complete metrics {'ate': 1.0337419052292118, 'are': 95.37885258061355, 'rpe_rot': 14.27665589259331, 'rpe_trans': 0.18529207456217042, 'chamfer_distance': 0.5823379691526596, 'inference_time_ms': 342308.95018577576, 'fps': 2.9213375795674823}
+🚩Processing scene0451_01 Found 1000 images
+encode_images time: 5.376099109649658
+pos emb time: 0.13532805442810059
+decoder time: 0.09160280227661133
+head prepare input time: 0.0003771781921386719
+head forward time: 336.3501889705658
+total Fast3R forward time: 341.9542646408081
+Inference FPS (frames/s): 2.92 [2025-11-15 07:31:34]
+Complete metrics {'ate': 1.1253743192348966, 'are': 92.30412207328803, 'rpe_rot': 23.926608228179365, 'rpe_trans': 0.42311156825935564, 'chamfer_distance': 0.6238514550487921, 'inference_time_ms': 341954.2646408081, 'fps': 2.924367681305011}
+🚩Processing scene0466_01 Found 700 images
+encode_images time: 3.7262821197509766
+pos emb time: 0.09296894073486328
+decoder time: 0.0697782039642334
+head prepare input time: 0.00042319297790527344
+head forward time: 161.60209608078003
+total Fast3R forward time: 165.49218463897705
+Inference FPS (frames/s): 4.23 [2025-11-15 07:35:27]
+Complete metrics {'ate': 4.880269201751269, 'are': 84.59445623302564, 'rpe_rot': 25.700728632512686, 'rpe_trans': 1.354031012947073, 'chamfer_distance': 0.4038999556948375, 'inference_time_ms': 165492.18463897705, 'fps': 4.229806993768663}
+🚩Processing scene0477_00 Found 1000 images
+encode_images time: 5.379759073257446
+pos emb time: 0.13489007949829102
+decoder time: 0.08879852294921875
+head prepare input time: 0.0003871917724609375
+head forward time: 335.3866653442383
+total Fast3R forward time: 340.99122381210327
+Inference FPS (frames/s): 2.93 [2025-11-15 07:42:18]
+Complete metrics {'ate': 4.038258671449458, 'are': 91.87662019354325, 'rpe_rot': 60.94703649805516, 'rpe_trans': 0.9483030473528458, 'chamfer_distance': 0.5348651867461153, 'inference_time_ms': 340991.2238121033, 'fps': 2.9326267955536327}
+🚩Processing scene0493_01 Found 1000 images
+encode_images time: 5.3562726974487305
+pos emb time: 0.13500571250915527
+decoder time: 0.11170744895935059
+head prepare input time: 0.0005533695220947266
+head forward time: 335.7698495388031
+total Fast3R forward time: 341.3740532398224
+Inference FPS (frames/s): 2.93 [2025-11-15 07:50:43]
+Complete metrics {'ate': 2.9171094563795026, 'are': 96.83521001084094, 'rpe_rot': 17.734311550840733, 'rpe_trans': 0.7278488242489662, 'chamfer_distance': 0.8032034015925746, 'inference_time_ms': 341374.0532398224, 'fps': 2.929338039928533}
+🚩Processing scene0509_01 Found 1000 images
+encode_images time: 5.355087995529175
+pos emb time: 0.13320112228393555
+decoder time: 0.0892021656036377
+head prepare input time: 0.0003788471221923828
+head forward time: 333.940309047699
+total Fast3R forward time: 339.5188088417053
+Inference FPS (frames/s): 2.95 [2025-11-15 07:57:51]
+Complete metrics {'ate': 0.4213936644969511, 'are': 96.07253677826849, 'rpe_rot': 15.451263176331286, 'rpe_trans': 0.16578019614012454, 'chamfer_distance': 0.46834080173881426, 'inference_time_ms': 339518.8088417053, 'fps': 2.9453449233389377}
+🚩Processing scene0525_00 Found 1000 images
+encode_images time: 5.369542121887207
+pos emb time: 0.13301324844360352
+decoder time: 0.11109423637390137
+head prepare input time: 0.00054931640625
+head forward time: 335.05230474472046
+total Fast3R forward time: 340.6671257019043
+Inference FPS (frames/s): 2.94 [2025-11-15 08:05:03]
+Complete metrics {'ate': 1.1942413881741378, 'are': 90.982525154911, 'rpe_rot': 17.764691812934107, 'rpe_trans': 0.5877208884141706, 'chamfer_distance': 0.5590731994429372, 'inference_time_ms': 340667.1257019043, 'fps': 2.935416788278641}
+🚩Processing scene0540_02 Found 875 images
+encode_images time: 4.718323469161987
+pos emb time: 0.11785531044006348
+decoder time: 0.10078167915344238
+head prepare input time: 0.0006041526794433594
+head forward time: 255.42201375961304
+total Fast3R forward time: 260.36017060279846
+Inference FPS (frames/s): 3.36 [2025-11-15 08:10:42]
+Complete metrics {'ate': 0.670590551241597, 'are': 110.44782034269474, 'rpe_rot': 31.966424753594374, 'rpe_trans': 0.18062646793268652, 'chamfer_distance': 0.5799077663275568, 'inference_time_ms': 260360.17060279846, 'fps': 3.3607290929874476}
+🚩Processing scene0555_00 Found 1000 images
+encode_images time: 5.34161639213562
+pos emb time: 0.13230657577514648
+decoder time: 0.0892782211303711
+head prepare input time: 0.0003552436828613281
+head forward time: 334.7468340396881
+total Fast3R forward time: 340.31081557273865
+Inference FPS (frames/s): 2.94 [2025-11-15 08:18:54]
+Complete metrics {'ate': 3.450204578553506, 'are': 72.66833762285727, 'rpe_rot': 20.997210293997124, 'rpe_trans': 0.8095330826451678, 'chamfer_distance': 0.7596421870302359, 'inference_time_ms': 340310.81557273865, 'fps': 2.938490210242108}
+🚩Processing scene0571_00 Found 1000 images
+encode_images time: 5.3745832443237305
+pos emb time: 0.13311553001403809
+decoder time: 0.1116945743560791
+head prepare input time: 0.0005655288696289062
+head forward time: 335.4406499862671
+total Fast3R forward time: 341.0612349510193
+Inference FPS (frames/s): 2.93 [2025-11-15 08:26:05]
+Complete metrics {'ate': 0.9340563184795663, 'are': 99.92516358133868, 'rpe_rot': 12.884793272573445, 'rpe_trans': 0.13916006514622065, 'chamfer_distance': 0.48043672642114066, 'inference_time_ms': 341061.2349510193, 'fps': 2.932024802360235}
+🚩Processing scene0582_02 Found 1000 images
+encode_images time: 5.367103576660156
+pos emb time: 0.13315320014953613
+decoder time: 0.08907175064086914
+head prepare input time: 0.0003674030303955078
+head forward time: 334.3413381576538
+total Fast3R forward time: 339.93164348602295
+Inference FPS (frames/s): 2.94 [2025-11-15 08:33:16]
+Complete metrics {'ate': 2.8717916896785525, 'are': 109.81667889586822, 'rpe_rot': 4.735555601403591, 'rpe_trans': 0.14856484630145053, 'chamfer_distance': 0.5790399246248494, 'inference_time_ms': 339931.64348602295, 'fps': 2.9417679088211077}
+🚩Processing scene0593_00 Found 1000 images
+encode_images time: 5.359154224395752
+pos emb time: 0.13182997703552246
+decoder time: 0.08790135383605957
+head prepare input time: 0.0003647804260253906
+head forward time: 333.1951832771301
+total Fast3R forward time: 338.7749972343445
+Inference FPS (frames/s): 2.95 [2025-11-15 08:40:07]
+Complete metrics {'ate': 2.2898361760807138, 'are': 105.22540950247874, 'rpe_rot': 71.77129089914379, 'rpe_trans': 0.4941972870310866, 'chamfer_distance': 0.5627949552439808, 'inference_time_ms': 338774.9972343445, 'fps': 2.9518116985128606}
+🚩Processing scene0606_01 Found 1000 images
+encode_images time: 5.374346494674683
+pos emb time: 0.13136887550354004
+decoder time: 0.08824658393859863
+head prepare input time: 0.0003638267517089844
+head forward time: 335.51365423202515
+total Fast3R forward time: 341.1084852218628
+Inference FPS (frames/s): 2.93 [2025-11-15 08:47:10]
+Complete metrics {'ate': 1.218485867820472, 'are': 106.13878153067317, 'rpe_rot': 21.569177269616706, 'rpe_trans': 0.3133617465545038, 'chamfer_distance': 0.8398366269312028, 'inference_time_ms': 341108.4852218628, 'fps': 2.9316186589424267}
+🚩Processing scene0619_00 Found 1000 images
+encode_images time: 5.385572910308838
+pos emb time: 0.13547492027282715
+decoder time: 0.11135363578796387
+head prepare input time: 0.0005774497985839844
+head forward time: 334.7877426147461
+total Fast3R forward time: 340.4213740825653
+Inference FPS (frames/s): 2.94 [2025-11-15 08:54:17]
+Complete metrics {'ate': 1.8988963930042024, 'are': 62.57747615645606, 'rpe_rot': 10.079731519698589, 'rpe_trans': 0.23780497450504667, 'chamfer_distance': 0.3260990433713542, 'inference_time_ms': 340421.3740825653, 'fps': 2.9375358779835645}
+🚩Processing scene0631_01 Found 1000 images
+encode_images time: 5.573459148406982
+pos emb time: 0.1376333236694336
+decoder time: 16.242185592651367
+head prepare input time: 0.001216888427734375
+head forward time: 348.7481417655945
+total Fast3R forward time: 370.7031931877136
+Inference FPS (frames/s): 2.70 [2025-11-15 09:01:37]
+Complete metrics {'ate': 2.7514611748302844, 'are': 90.56996784301136, 'rpe_rot': 10.325468926354, 'rpe_trans': 0.25909154747108154, 'chamfer_distance': 0.5919526178083914, 'inference_time_ms': 370703.1931877136, 'fps': 2.6975759000101958}
+🚩Processing scene0648_00 Found 1000 images
+encode_images time: 5.369271278381348
+pos emb time: 0.14087557792663574
+decoder time: 0.08865737915039062
+head prepare input time: 0.00036144256591796875
+head forward time: 334.6130967140198
+total Fast3R forward time: 340.2127568721771
+Inference FPS (frames/s): 2.94 [2025-11-15 09:08:45]
+Complete metrics {'ate': 0.6333416053177485, 'are': 98.67667215579402, 'rpe_rot': 37.42022316936273, 'rpe_trans': 0.11676890477718267, 'chamfer_distance': 0.41816646838939087, 'inference_time_ms': 340212.7568721771, 'fps': 2.9393371641725783}
+🚩Processing scene0663_01 Found 1000 images
+encode_images time: 5.365086793899536
+pos emb time: 0.14235568046569824
+decoder time: 0.08894824981689453
+head prepare input time: 0.0003883838653564453
+head forward time: 334.0688326358795
+total Fast3R forward time: 339.6663546562195
+Inference FPS (frames/s): 2.94 [2025-11-15 09:15:58]
+Complete metrics {'ate': 1.1415750133217024, 'are': 114.27975703861003, 'rpe_rot': 12.324754301864223, 'rpe_trans': 0.15479186640189505, 'chamfer_distance': 0.5891940400461595, 'inference_time_ms': 339666.3546562195, 'fps': 2.944065511028057}
+🚩Processing scene0675_00 Found 849 images
+encode_images time: 4.578106164932251
+pos emb time: 0.12256693840026855
+decoder time: 0.08491396903991699
+head prepare input time: 0.0003998279571533203
+head forward time: 238.7885024547577
+total Fast3R forward time: 243.5752112865448
+Inference FPS (frames/s): 3.49 [2025-11-15 09:21:20]
+Complete metrics {'ate': 2.1491120019491277, 'are': 121.00632303420576, 'rpe_rot': 8.995896694983227, 'rpe_trans': 0.3216619659987945, 'chamfer_distance': 0.5704514314553187, 'inference_time_ms': 243575.2112865448, 'fps': 3.4855763668053488}
+Idx: scene0000_00, FPS_avg: 2.86
+Idx: scene0013_02, FPS_avg: 2.94
+Idx: scene0029_01, FPS_avg: 2.93
+Idx: scene0042_02, FPS_avg: 2.94
+Idx: scene0056_00, FPS_avg: 2.93
+Idx: scene0071_00, FPS_avg: 2.93
+Idx: scene0084_01, FPS_avg: 2.94
+Idx: scene0096_00, FPS_avg: 2.94
+Idx: scene0109_00, FPS_avg: 2.94
+Idx: scene0121_01, FPS_avg: 2.94
+Idx: scene0136_01, FPS_avg: 3.75
+Idx: scene0151_00, FPS_avg: 2.93
+Idx: scene0164_01, FPS_avg: 3.57
+Idx: scene0177_01, FPS_avg: 2.94
+Idx: scene0194_00, FPS_avg: 2.95
+Idx: scene0207_01, FPS_avg: 2.94
+Idx: scene0221_01, FPS_avg: 3.80
+Idx: scene0238_00, FPS_avg: 5.07
+Idx: scene0254_01, FPS_avg: 2.94
+Idx: scene0267_00, FPS_avg: 4.28
+Idx: scene0280_00, FPS_avg: 2.94
+Idx: scene0294_02, FPS_avg: 2.95
+Idx: scene0309_00, FPS_avg: 2.94
+Idx: scene0325_01, FPS_avg: 2.95
+Idx: scene0340_01, FPS_avg: 2.94
+Idx: scene0353_02, FPS_avg: 2.94
+Idx: scene0367_01, FPS_avg: 3.51
+Idx: scene0380_02, FPS_avg: 3.38
+Idx: scene0395_00, FPS_avg: 2.92
+Idx: scene0409_01, FPS_avg: 2.93
+Idx: scene0421_02, FPS_avg: 2.94
+Idx: scene0435_03, FPS_avg: 2.92
+Idx: scene0451_01, FPS_avg: 2.92
+Idx: scene0466_01, FPS_avg: 4.23
+Idx: scene0477_00, FPS_avg: 2.93
+Idx: scene0493_01, FPS_avg: 2.93
+Idx: scene0509_01, FPS_avg: 2.95
+Idx: scene0525_00, FPS_avg: 2.94
+Idx: scene0540_02, FPS_avg: 3.36
+Idx: scene0555_00, FPS_avg: 2.94
+Idx: scene0571_00, FPS_avg: 2.93
+Idx: scene0582_02, FPS_avg: 2.94
+Idx: scene0593_00, FPS_avg: 2.95
+Idx: scene0606_01, FPS_avg: 2.93
+Idx: scene0619_00, FPS_avg: 2.94
+Idx: scene0631_01, FPS_avg: 2.70
+Idx: scene0648_00, FPS_avg: 2.94
+Idx: scene0663_01, FPS_avg: 2.94
+Idx: scene0675_00, FPS_avg: 3.49
+
+Average metrics:
+chamfer_distance: 0.615500
+ate: 1.665017
+are: 97.848031
+rpe_rot: 28.153291
+rpe_trans: 0.371309
+inference_time_ms: 314401.947815

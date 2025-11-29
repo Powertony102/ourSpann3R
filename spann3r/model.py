@@ -12,7 +12,7 @@ class SpatialMemory():
     def __init__(self, norm_q, norm_k, norm_v, mem_dropout=None, 
                  long_mem_size=4000, work_mem_size=5, 
                  attn_thresh=5e-4, sim_thresh=0.95, 
-                 save_attn=False, num_patches=None):
+                 save_attn=False, num_patches=None, verbose=False):
         self.norm_q = norm_q
         self.norm_k = norm_k
         self.norm_v = norm_v
@@ -24,6 +24,7 @@ class SpatialMemory():
         self.save_attn = save_attn
         self.sim_thresh = sim_thresh
         self.num_patches = num_patches
+        self.verbose = verbose
         self.init_mem()
     
     def init_mem(self):
@@ -112,7 +113,8 @@ class SpatialMemory():
         mean_corr = torch.mean(corr, dim=-1)
 
         if mean_corr.max() > thresh:
-            print('Similarity detected:', mean_corr.max())
+            if self.verbose:
+                print('Similarity detected:', mean_corr.max())
             return True
     
         return False
@@ -134,7 +136,8 @@ class SpatialMemory():
                 self.mem_v = self.mem_v[:, self.num_patches:]
                 self.mem_count = self.mem_count[:, self.num_patches:]
                 self.mem_attn = self.mem_attn[:, self.num_patches:]
-                print('Memory pruned:', self.mem_k.shape)
+                if self.verbose:
+                    print('Memory pruned:', self.mem_k.shape)
             else:
                 self.lm += self.num_patches
         
@@ -207,16 +210,18 @@ class SpatialMemory():
 
         num_mem_a = self.mem_k.shape[1]
 
-        print('Memory pruned:', num_mem_b, '->', num_mem_a)
+        if self.verbose:
+            print('Memory pruned:', num_mem_b, '->', num_mem_a)
     
 
 class Spann3R(nn.Module):
     def __init__(self, dus3r_name="./checkpoints/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth", 
-                 use_feat=False, mem_pos_enc=False, memory_dropout=0.15):
+                 use_feat=False, mem_pos_enc=False, memory_dropout=0.15, verbose=False):
         super(Spann3R, self).__init__()
         # config
         self.use_feat = use_feat
         self.mem_pos_enc = mem_pos_enc
+        self.verbose = verbose
 
         # DUSt3R
         self.dust3r = AsymmetricCroCo3DStereo.from_pretrained(dus3r_name, landscape_only=True)
@@ -352,7 +357,8 @@ class Spann3R(nn.Module):
         
         pair_idx = np.unravel_index(conf_matrix.argmax(), conf_matrix.shape)
 
-        print(f'init pair:{pair_idx}, conf: {conf_matrix.max()}')
+        if self.verbose:
+            print(f'init pair:{pair_idx}, conf: {conf_matrix.max()}')
 
         return pair_idx
     
@@ -397,7 +403,7 @@ class Spann3R(nn.Module):
         idx_todo = list(range(n_frames))
         idx_used = []
 
-        sp_mem = SpatialMemory(self.norm_q, self.norm_k, self.norm_v, mem_dropout=self.mem_dropout)
+        sp_mem = SpatialMemory(self.norm_q, self.norm_k, self.norm_v, mem_dropout=self.mem_dropout, verbose=self.verbose)
 
         pair_idx = self.find_initial_pair(graph, n_frames)
         f1, f2 = frames[pair_idx[0]], frames[pair_idx[1]]
@@ -436,7 +442,8 @@ class Spann3R(nn.Module):
                 idx_todo.remove(id_n)
                 idx_used.append(id_n)
 
-                print(f'next best view: {id_n}, conf: {best_conf}')
+                if self.verbose:
+                    print(f'next best view: {id_n}, conf: {best_conf}')
 
 
             # encode feat
@@ -472,9 +479,9 @@ class Spann3R(nn.Module):
     
     def forward(self, frames, return_memory=False):
         if self.training:
-            sp_mem = SpatialMemory(self.norm_q, self.norm_k, self.norm_v, mem_dropout=self.mem_dropout, attn_thresh=0)
+            sp_mem = SpatialMemory(self.norm_q, self.norm_k, self.norm_v, mem_dropout=self.mem_dropout, attn_thresh=0, verbose=self.verbose)
         else:
-            sp_mem = SpatialMemory(self.norm_q, self.norm_k, self.norm_v)
+            sp_mem = SpatialMemory(self.norm_q, self.norm_k, self.norm_v, verbose=self.verbose)
         
         feat1, feat2, pos1, pos2, shape1, shape2 = None, None, None, None, None, None
         feat_k1, feat_k2 = None, None

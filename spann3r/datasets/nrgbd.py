@@ -45,15 +45,11 @@ class NRGBD(BaseManyViewDataset):
             self.tuple_list = None
     
     def load_all_scenes(self, base_dir):
-        
-        scenes = os.listdir(base_dir)
-        
+        scenes = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d))]
         if self.test_id is not None:
             self.scene_list = [self.test_id]
-        
         else:
             self.scene_list = scenes
-        
         print(f"Found {len(self.scene_list)} sequences in split {self.split}")
     
     def load_poses(self, path):
