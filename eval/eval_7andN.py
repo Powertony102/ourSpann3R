@@ -245,7 +245,11 @@ def main(args):
                 labels = []
                 for v in batch:
                     try:
-                        labels.append(v["label"])
+                        lbl = v["label"]
+                        if isinstance(lbl, (list, tuple)):
+                            labels.append(lbl[0] if len(lbl) > 0 else "")
+                        else:
+                            labels.append(lbl)
                     except Exception:
                         labels.append("")
 
@@ -424,7 +428,10 @@ def main(args):
                 masks_all = np.concatenate(masks_all, axis=0)
                 conf_all = np.concatenate(conf_all, axis=0)
 
-                scene_id = view["label"].rsplit("/", 1)[0]
+                scene_label = view["label"]
+                if isinstance(scene_label, (list, tuple)):
+                    scene_label = scene_label[0] if len(scene_label) > 0 else ""
+                scene_id = str(scene_label).rsplit("/", 1)[0]
                 # Record FPS per scene for averaging later
                 try:
                     scene_infer_times[scene_id].append(float(fps))
